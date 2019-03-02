@@ -67,9 +67,11 @@ var budgetController = (function() {
       // After checking the "type", add the item to the respective array of the "allItems" property in the data object
 
       data.allItems[type].push(newItem);
+
+      return newItem;
     },
     testDataArray: function() {
-      return data;
+      console.log(data);
     }
   };
 })();
@@ -81,7 +83,9 @@ var UIController = (function() {
     inputType: '.add__type',
     inputDescription: '.add__description',
     inputValue: '.add__value',
-    inputBtn: '.add__btn'
+    inputBtn: '.add__btn',
+    expenseItem: '.expenses__list',
+    incomeList: '.income__list'
   };
 
   // Get values and put them in the global scope
@@ -98,6 +102,46 @@ var UIController = (function() {
     // also return the DOM values so they can be accessible by other modules
     getDOMstrings: function() {
       return DOMstrings;
+    },
+
+    addListItem: function(obj, type) {
+      var html, element, newHtml;
+
+      // create HTML placeholder text
+
+      if (type === 'inc') {
+        element = DOMstrings.incomeList;
+        html =
+          '<div class="item clearfix" id="income-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+      } else if (type === 'exp') {
+        element = DOMstrings.expenseItem;
+        html =
+          '<div class="item clearfix" id="expense-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+      }
+      // replace placeholder values with actual data
+
+      newHtml = html.replace('%id%', obj.id);
+      newHtml = newHtml.replace('%description%', obj.description);
+      newHtml = newHtml.replace('%value%', obj.value);
+      // Insert HTML into DOM
+
+      document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
+    },
+
+    clearFields: function() {
+      var fields, fieldsArray;
+
+      fields = document.querySelectorAll(
+        DOMstrings.inputDescription + ', ' + DOMstrings.inputValue
+      );
+
+      fieldsArray = Array.prototype.slice.call(fields);
+
+      fieldsArray.forEach(function(cur, index, arr) {
+        cur.value = '';
+      });
+
+      fieldsArray[0].focus();
     }
   };
 })();
@@ -140,8 +184,14 @@ var controller = (function(budgetCtrl, UICtrl) {
 
     // 3. Add new item to the UI
 
-    // 4. calculate budget
-    // 5. Update budget in the UI
+    UICtrl.addListItem(newItem, input.type);
+
+    // 4. Clear fields
+
+    UICtrl.clearFields();
+
+    // 5. calculate budget
+    // 6. Update budget in the UI
   };
 
   return {
